@@ -1,0 +1,15 @@
+#!/bin/zsh
+
+function convert_pic() {
+	[[ ! -e processed ]] && mkdir processed
+	cd originals
+	for i in *.jpg; do
+		echo "convert $i"
+		#convert originals/$i -resize x263  -gravity center -extent 277x263  -quality 50 $i 
+		convert $i -resize x135  -gravity center -extent 216x135  -quality 50 ../processed/$i 
+	done
+}
+
+case $1 in
+	pic ) convert_pic $*[2,-1] ;;
+esac

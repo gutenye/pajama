@@ -18,4 +18,6 @@ a good lib
 
 	s.add_dependency "tagen"
 	s.add_dependency "thor"
+
+	s.executables = %w(pajama)
 end

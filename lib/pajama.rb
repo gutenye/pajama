@@ -1,4 +1,11 @@
-require "tagen/core"
-require "thor"
+require "bundler/setup"
+Bundler.require
 
-%w(cli picture util rc).each {|n| require_relative "pajama/#{n}"}
+module Pajama
+	Error = Class.new Exception
+end
+
+%w(cli picture process util rc).each {|n| require_relative "pajama/#{n}"}
+
+# load profile
+#load Pa.join(ENV["HOME"], ".pajama/#{$profile}")

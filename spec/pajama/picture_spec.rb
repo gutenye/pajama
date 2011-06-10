@@ -1,40 +1,62 @@
 require "spec_helper"
 
-include Pajama
-
-describe Picture do
-	describe ".mv_pic" do 
-
-		def camera_setup
-			Pa.cp_f Rc.mount_point.join("archive/a.JPG"), Rc.mount_point.join("a.JPG")
-		end
-
-		def clean_up
-			pwd_bak = Pa.pwd
-			Pa.cd $spec_dir.join('data')
-			%w(camera/* pic/erp/* pic/new/* tmp_pic/*).each do |path|
-				Pa.rm_f path
-			end
-			Pa.cd pwd_bak
-		end
-
-		it "works" do
-			clean_up
-			camera_setup
-			Picture.mv_pic
-
-			Rc.mount_point.join('a.JPG').should_not be_exists
-			Rc.pic_dir.join("new/a.JPG").should be_exists
-		end
+$collections=[]
+class Pajama::Picture
+	def handle_dir dir, type, product_id, o={}
+		$collections << [dir.absolute, type, product_id, o]
 	end
+end
 
-	describe ".process" do
-		it "works" do
-			Picture.process :erp
+include Pajama
+describe Picture do
+	describe ".handle" do
+		# new/
+		#   pajama/ jyx1112 jyx1113
+		#   pajap/ jyx1111
+		# pajama/ lz12 lz11
 
-			Rc.tmp_dir.join('a.JPG').should be_exists
-			Rc.pic_dir.join('new/a.JPG').should_not be_exists
-			Rc.pic_dir.join('erp/a.JPG').should be_exists
+		before(:all) do
+			%w(new/pajama/jyx1112 new/pajama/jyx1113 new/pajap/jyx1111
+				 pajama/lz12 pajama/lz11).each do |name|
+				Pa.mkdir Rc.pic_dir.join(name)
+			 end
+		end
+
+		after(:all) do
+			# empty new/ pajama/
+			Pa.rm_r Rc.pic_dir.join("new/*")
+			Pa.rm_r Rc.pic_dir.join("pajama/*")
+		end
+
+		it "handle new/" do
+			right = [ 
+				[Rc.pic_dir.join("new/pajama/jyx1112").absolute, "pajama", "jyx1112", {new: true}],
+				[Rc.pic_dir.join("new/pajama/jyx1113").absolute, "pajama", "jyx1113", {new: true}],
+				[Rc.pic_dir.join("new/pajap/jyx1111").absolute, "pajap", "jyx1111", {new: true}],
+			]
+
+			Picture.handle("new")
+			$collections.sort{|a,b| a[0]<=>b[0]}.should == right
+			$collections = []
+		end
+
+		it "handle pajama" do
+			right = [
+				[Rc.pic_dir.join("pajama/lz11").absolute, "pajama", "lz11", {}],
+				[Rc.pic_dir.join("pajama/lz12").absolute, "pajama", "lz12", {}],
+			]
+			Picture.handle("pajama")
+			$collections.sort{|a,b| a[0]<=>b[0]}.should == right
+			$collections = []
+		end
+
+		it "handle pajama/lz11" do
+			right = [
+				[Rc.pic_dir.join("pajama/lz11").absolute, "pajama", "lz11", {}]
+			]
+			Picture.handle("pajama/lz11")
+			$collections.sort{|a,b| a[0]<=>b[0]}.should == right
+			$collections = []
 		end
 	end
 end

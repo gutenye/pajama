@@ -1,23 +1,75 @@
+=begin
+=end
+=begin Design
+
+handle(dir_desc)  # dir_desc := new pajama pajama/jyx1113
+	->
+	handle_dir(dir, type, product_id, o) # ( Pa'..pajama/jyx1113/', "pajama", "jyx1113" )  
+
+=end
+
 module Pajama
 	class Picture
-		def self.mv_pic
-			Pa.mv Rc.mount_point.join("/*.JPG"), Rc.pic_dir.join("/new")
+		def self.load_profile profile
+			load Pa.join(ENV["HOME"], ".pajama/#{profile}")
 		end
 
-		# @type: :erp :taobao
-		#
-		def self.process type
-			Pa.mkdir_f Rc.tmp_dir 
+		def self.mv_pic
+			Pa.mv Rc.mount_point.join("*.JPG"), Rc.pic_dir.join("new")
+		end
+		def self.handle *args, &blk
+			self.new.handle *args, &blk
+		end
 
-			Pa.each Rc.pic_dir.join("/new") do |pa|
-				next if pa.ext !~ /jpg/i
-				puts "convert #{pa.base}"
-				case type
-				when :erp
-					`convert #{pa.p} -resize x135  -gravity center -extent 216x135 -quality 80 #{Rc.tmp_dir}/#{pa.base}`
-					Pa.mv_f pa.p, Rc.pic_dir.join("/erp")
-				end
+		def handle profile, dir_desc="new"
+			path = Rc.pic_dir.join(dir_desc)
 
+			o={}
+			# "new"
+			if dir_desc == "new"
+				o = {new: true}
+				Pa.each(path) {|pa|
+					next unless pa.directory?
+					type = pa.name
+					Pa.each(pa) {|pa1|
+						next unless pa1.directory?
+						product_id = pa1.name
+						handle_dir(profile, pa1, type, product_id, o)
+					}
+				}
+
+			# "pajama"
+			elsif dir_desc.count('/') == 0
+				type = dir_desc
+				Pa.each(path) {|pa|
+					next unless pa.directory?
+					product_id = pa.name
+					handle_dir(profile, pa, type, product_id, o)
+				}
+
+			# "pajama/jyx113"
+			elsif dir_desc.count('/') == 1
+				_, type, product_id = dir_desc.match(/(.*)\/(.*)/).to_a
+				handle_dir(profile, path, type, product_id, o)
+			end
+
+			# empty new/
+			if o[:new]
+				Pa.rm_r Rc.pic_dir.join("new/*") unless $spec_test
+			end
+
+		end
+
+		def handle_dir profile, dir, type, product_id, o={}
+			processor = Process.find(type)
+			paths = Pa.each(dir).with_object([]){|pa, m| m << pa if Util.picture_file?(pa)}
+
+			# write to release/
+			processor.process(profile, paths, type, product_id, o)
+
+			# move to pajama/jyx1114
+			if o[:new]
+				Pa.mv_f dir, Rc.pic_dir.join(type)
 			end
 		end
 

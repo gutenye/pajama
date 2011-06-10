@@ -10,19 +10,15 @@ handle(dir_desc)  # dir_desc := new pajama pajama/jyx1113
 
 module Pajama
 	class Picture
-		def self.load_profile profile
-			load Pa.join(ENV["HOME"], ".pajama/#{profile}")
-		end
-
 		def self.mv_pic
-			Pa.mv Rc.mount_point.join("*.JPG"), Rc.pic_dir.join("new")
+			Pa.mv Rc.p.mount_point.join("*.JPG"), Rc.p.pic.join("new")
 		end
 		def self.handle *args, &blk
 			self.new.handle *args, &blk
 		end
 
-		def handle profile, dir_desc="new"
-			path = Rc.pic_dir.join(dir_desc)
+		def handle dir_desc="new"
+			path = Rc.p.pic.join(dir_desc)
 
 			o={}
 			# "new"
@@ -34,7 +30,7 @@ module Pajama
 					Pa.each(pa) {|pa1|
 						next unless pa1.directory?
 						product_id = pa1.name
-						handle_dir(profile, pa1, type, product_id, o)
+						handle_dir(pa1, type, product_id, o)
 					}
 				}
 
@@ -44,32 +40,32 @@ module Pajama
 				Pa.each(path) {|pa|
 					next unless pa.directory?
 					product_id = pa.name
-					handle_dir(profile, pa, type, product_id, o)
+					handle_dir(pa, type, product_id, o)
 				}
 
 			# "pajama/jyx113"
 			elsif dir_desc.count('/') == 1
 				_, type, product_id = dir_desc.match(/(.*)\/(.*)/).to_a
-				handle_dir(profile, path, type, product_id, o)
+				handle_dir(path, type, product_id, o)
 			end
 
 			# empty new/
 			if o[:new]
-				Pa.rm_r Rc.pic_dir.join("new/*") unless $spec_test
+				Pa.rm_r Rc.p.pic.join("new/*") unless $spec_test
 			end
 
 		end
 
-		def handle_dir profile, dir, type, product_id, o={}
+		def handle_dir dir, type, product_id, o={}
 			processor = Process.find(type)
 			paths = Pa.each(dir).with_object([]){|pa, m| m << pa if Util.picture_file?(pa)}
 
 			# write to release/
-			processor.process(profile, paths, type, product_id, o)
+			processor.process(paths, type, product_id, o)
 
 			# move to pajama/jyx1114
 			if o[:new]
-				Pa.mv_f dir, Rc.pic_dir.join(type)
+				Pa.mv_f dir, Rc.p.pic.join(type)
 			end
 		end
 

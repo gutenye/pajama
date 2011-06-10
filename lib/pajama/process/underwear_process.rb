@@ -1,34 +1,33 @@
 module Pajama
 	class UnderwearProcess < Process
-		def self.process profile, files, type, product_id, o={}
-			Pa.mkdir_f(Rc.release_pa.join(type, product_id))
+		def self.process files, type, product_id, o={}
+			Pa.mkdir_f(Rc.p.release.join(type, product_id))
 
-			self.process_1200x profile, files, type, product_id, o
-			self.process_30x30 profile, files, type, product_id, o
-			self.process_all profile, files, type, product_id, o
-
+			self.process_1200x files, type, product_id, o
+			self.process_30x30 files, type, product_id, o
+			self.process_all files, type, product_id, o
 		end
-		def self.process_1200x profile, files, type, product_id, o={}
+		def self.process_1200x files, type, product_id, o={}
 			# 00.jpg 10.jpg detail1.jpg -> 1200x
 			files.find_all { |pa|
 				%w(00 10 detail1).include? pa.name
 			}.each { |pa|
 				puts "#{type}/#{product_id}/#{pa.fname} 1200x #{o[:new] ? 'new' : ''}"
-				process = self.new(profile, pa, type, product_id, Rc.watermark_pa, o)
+				process = self.new(pa, type, product_id, o)
 				process.process_1200x
 			}
 		end
-		def self.process_30x30 profile, files, type, product_id, o={}
+		def self.process_30x30 files, type, product_id, o={}
 			# 10.jpg -> 30x30
 			files.find_all { |pa|
-				pa.name =~ /^.0$/
+				pa.name =~ /^[1-9]0$/
 			}.each { |pa|
 				puts "#{type}/#{product_id}/#{pa.fname} 30x30 #{o[:new] ? 'new' : ''}"
-				process = self.new(profile, pa, type, product_id, Rc.watermark_pa, o)
+				process = self.new(pa, type, product_id, o)
 				process.process_30x30
 			}
 		end
-		def self.process_all profile, files, type, product_id, o={}
+		def self.process_all files, type, product_id, o={}
 			#
 			# all.jpg -> 750x
 			#
@@ -45,7 +44,7 @@ module Pajama
 			images = []
 			rst.each { |pa|
 				puts "#{type}/#{product_id}/#{pa.fname} 750x #{o[:new] ? 'new' : ''}"
-				process = self.new(profile, pa, type, product_id, Rc.watermark_pa, o)
+				process = self.new(pa, type, product_id, o)
 				images << process.process_750x
 			}
 
@@ -57,7 +56,7 @@ module Pajama
 			img = img.append true
 
 			puts "#{type}/#{product_id}/all.jpg 750x #{o[:new] ? 'new' : ''}"
-			path = Rc.release_pa.join(type, product_id, "all.jpg")
+			path = Rc.p.release.join(type, product_id, "all.jpg")
 			img.write(path)
 		end
 
@@ -97,7 +96,7 @@ module Pajama
 		end
 
 		def watermark
-			method("watermark_#{@profile}").call
+			method("watermark_#{Rc.profile}").call
 		end
 
 		def watermark_zong
@@ -119,10 +118,11 @@ module Pajama
 			# put watermark at south end
 			@img = @img.composite(@watermark, Magick::SouthGravity, 0, 0, Magick::OverCompositeOp)
 		end
+		alias watermark_default watermark_gooten
 
 		def write fname=nil
 			fname ||= @img_pa.fname
-			path = Rc.release_pa.join(type, product_id, fname)
+			path = Rc.p.release.join(type, product_id, fname)
 			@img.write(path) do |img| 
 				img.quality=70 unless path.name =~ /^_/
 			end unless $spec_test

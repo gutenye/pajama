@@ -6,19 +6,18 @@ module Pajama
 			@@processors << klass
 		end
 
-		def self.find profile
-			processor = @@processors.find {|klass| klass.name=~/#{profile}Process/i}
+		def self.find type
+			processor = @@processors.find {|klass| klass.name=~/#{type}Process/i}
 			unless processor
-				raise Error, "can't find the profile -- #{profile}" 
+				raise Error, "can't find the process type -- #{type}" 
 			end
 			processor
 		end
 
-		def initialize profile, pa, type, product_id, watermark_pa=nil, o={}
-			@profile = profile
+		def initialize pa, type, product_id, o={}
 			@img = Magick::ImageList.new(pa.p)[0]
 			@img_pa = pa
-			@watermark = Magick::ImageList.new(watermark_pa.p)[0] if watermark_pa
+			@watermark = Magick::ImageList.new(Rc.p.watermark)[0] 
 			@type = type
 			@product_id = product_id
 			@option = o

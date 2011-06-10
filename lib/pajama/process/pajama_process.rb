@@ -2,7 +2,7 @@ module Pajama
 	class PajamaProcess < Process
 		def initialize src
 			super(src)
-			@watermark = Magick::ImageList.new(Rc.watermark_pa.p)[0]
+			@watermark = Magick::ImageList.new(Rc.p.watermark.p)[0]
 		end
 
 		def process write_path

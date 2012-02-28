@@ -1,13 +1,59 @@
+require "stringio"
+require "bundler/setup"
 require "pajama"
 
-$spec_test = true
-$spec_dir = Pa(Pa(__FILE__).dir)
-module Pajama
-	class Rc
-		def self.mount_point; $spec_dir.join("data/camera") end
-		def self.pic_dir; $spec_dir.join("data/pic") end
-		def self.release_pa; $spec_dir.join("data/pic/release") end
-		def self.watermark_pa; $spec_dir.join("data/watermark.png") end 
-	end
+$spec_dir = File.expand_path("..", __FILE__)
+$spec_data = File.expand_path("../data", __FILE__)
+
+Rc = Pajama::Rc
+Rc._merge! Optimism <<EOF
+p:
+	project = Pa("#{$spec_data}/gooten")
+  home = Pa("#{$spec_data}/_pajama")
+
+  new = Pa("#{$spec_data}/gooten/new")
+	release = Pa("#{$spec_data}/gooten/release")
+  archive = project
+
+	mount_point  = Pa("#{$spec_data}/camera")
+	watermark = Pa("#{$spec_data}/watermark.png")
+EOF
+
+RSpec.configure do |config|
+  def capture(stream)
+    begin
+      stream = stream.to_s
+      eval "$#{stream} = StringIO.new"
+      yield
+      result = eval("$#{stream}").string
+    ensure
+      eval("$#{stream} = #{stream.upcase}")
+    end
+
+    result
+  end
+
+  alias :silence :capture
 end
 
+module Kernel 
+private
+
+  def xdescribe(*args, &blk)
+    describe *args do
+      pending "xxxxxxxxx"
+    end
+  end
+
+  def xcontext(*args, &blk)
+    context *args do
+      pending "xxxxxxxxx"
+    end
+  end
+
+  def xit(*args, &blk)
+    it *args do
+      pending "xxxxxxxx"
+    end
+  end
+end

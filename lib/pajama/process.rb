@@ -1,28 +1,38 @@
 module Pajama
 	class Process
-		@@processors = []
+    class << self
+      @@processors = []
 
-		def self.inherited klass
-			@@processors << klass
-		end
+      def processors
+        @@processors
+      end
 
-		def self.find type
-			processor = @@processors.find {|klass| klass.name=~/#{type}Process/i}
-			unless processor
-				raise Error, "can't find the process type -- #{type}" 
-			end
-			processor
-		end
+      def find(name)
+        p = processors.find {|klass| klass.name=~/#{name}/i}
 
-		def initialize pa, type, product_id, o={}
-			@img = Magick::ImageList.new(pa.p)[0]
-			@img_pa = pa
-			@watermark = Magick::ImageList.new(Rc.p.watermark)[0] 
-			@type = type
-			@product_id = product_id
-			@option = o
-		end
-	end
+        unless p
+          raise Error, "can't find the processor name -- #{name}" 
+        end
+
+        p
+      end
+
+      def run(type)
+        files = Pa.each_r(Rc.p.new).with_object([]) {|(p), m|
+          next if p.directory? 
+          next if p.name =~ /^src\.|^tao\./
+
+          m << p
+        }
+
+        Process.find(type).process(*files)
+
+        Pa.mv_f "#{Rc.p.new}/*", "#{Rc.p.release}"
+      end
+    end
+  end
 end
 
-%w(pajama pajap underwear).each{|n| require_relative "process/#{n}_process"}
+%w[base pajama pajap underwear].each{|v| require "pajama/process/#{v}"}
+
+# vim: fdn=4

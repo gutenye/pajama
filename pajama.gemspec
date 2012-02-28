@@ -1,9 +1,8 @@
-$: << "."
-require "version"
+Kernel.load File.expand_path("../lib/pajama/version.rb", __FILE__)
 
 Gem::Specification.new do |s|
 	s.name = "pajama"
-	s.version = Pajama::VERSION::IS
+	s.version = Pajama::VERSION
 	s.summary = "a util for process pajama related things"
 	s.description = <<-EOF
 a util for process pajama related things

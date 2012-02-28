@@ -1,24 +1,13 @@
-=begin
-=end
-=begin Design
-
-handle(dir_desc)  # dir_desc := new pajama pajama/jyx1113
-	->
-	handle_dir(dir, type, product_id, o) # ( Pa'..pajama/jyx1113/', "pajama", "jyx1113" )  
-
-=end
-
 module Pajama
 	class Picture
-		def self.mv_pic
-			Pa.mv Rc.p.mount_point.join("*.JPG"), Rc.p.pic.join("new")
-		end
-		def self.handle *args, &blk
-			self.new.handle *args, &blk
-		end
+    class << self
+      def handle(*args, &blk)
+        Picture.new.handle *args, &blk
+      end
+    end
 
-		def handle dir_desc="new"
-			path = Rc.p.pic.join(dir_desc)
+		def handle(dir_desc="new")
+			path = Pa"#{Rc.p.pic}/#{dir_desc}"
 
 			o={}
 			# "new"
@@ -51,23 +40,22 @@ module Pajama
 
 			# empty new/
 			if o[:new]
-				Pa.rm_r Rc.p.pic.join("new/*") unless $spec_test
+				Pa.rm_r "#{Rc.p.pic}/new/*" unless $spec_test
 			end
 
 		end
 
-		def handle_dir dir, type, product_id, o={}
+		def handle_dir(dir, type, product_id, o={})
 			processor = Process.find(type)
-			paths = Pa.each(dir).with_object([]){|pa, m| m << pa if Util.picture_file?(pa)}
+			paths = Pa.each(dir).with_object([]){|(pa), m| m << pa if Util.picture_file?(pa)}
 
 			# write to release/
 			processor.process(paths, type, product_id, o)
 
 			# move to pajama/jyx1114
 			if o[:new]
-				Pa.mv_f dir, Rc.p.pic.join(type)
+				Pa.mv_f dir, "#{Rc.p.pic}/#{type}"
 			end
 		end
-
 	end
 end

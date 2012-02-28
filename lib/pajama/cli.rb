@@ -1,43 +1,54 @@
+require "thor"
+
 module Pajama
 	class CLI < Thor
 
-		class_options :p => :string # profile
+    class_option "no-color", :banner => "Disable colorization in output", :type => :boolean
+    class_option "verbose", :aliases => "-V", :banner => "Enable verbose output mode" :type => :boolean
+		class_option "profile", :aliases => "-p", :default => "default", :banner => "load user profile", :type => :string
+
+    attr_reader :o
+
+    def initialize(*)
+      super
+      o = @o = options.dup
+      the_shell = (options["no-color"] ? Thor::Shell::Basic.new : shell)
+      Pajama.ui = UI::Shell.new(the_shell)
+      Pajama.ui.debug! if options["verbose"]
+
+      # load profile configuration
+      Rc._merge! Optimima.require("~/.pajama/#{o[:profile]}")
+			Rc.profile = o[:profile]
+    end
+
+		desc "process <type>", "process pic"
+		def process(type)
+      Process.run type
+		end
+
+    desc "archive", "mv release to archive"
+    def archive(type)
+      Pa.mv "#{Rc.p.release}/*", "#{Rc.p.archive}"
+    end
 
 		desc "mv", "mv camera to new"
 		def mv
-			load_config(options[:p] || "default")
 			unless Util.mounted?
 				puts "ERROR. the camera is not mounted."
 				exit
 			end
-			Picture.mv_pic 
-		end
 
-		# dir: new taobao pajap taobao/jyx111 pajap/jyx111
-		#
-		desc "pic [dir] ", "process pic"
-		def pic dir="new"
-			load_config(options[:p] || "default")
-			Picture.handle dir
+      Pa.mv "#{Rc.p.mount_point}/*.JPG", "#{Rc.p.pic}/new"
 		end
 
 		desc "clean", "clean up release directory"
 		def clean
-			load_config(options[:p] || "default")
-			Pa.rm_r Rc.p.release.join("*")
+			Pa.rm_r "#{Rc.p.release}/*"
 		end
 
 		desc "origin", "cp new to original"
 		def origin
-			load_config(options[:p] || "default")
-			Pa.cp_f Rc.p.pic.join("new/*"), Rc.p.pic.join("original")
+			Pa.cp_f "#{Rc.p.pic}/new/*",  "#{Rc.p.pic}/original"
 		end
-
-		private
-		def load_config name
-			Pajama.const_set :Rc, O.load("~/.pajama/#{name}")
-			Rc.profile = name
-		end
-
 	end
 end

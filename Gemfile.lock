@@ -1,4 +1,9 @@
 PATH
+  remote: /home/guten/dev/one/pa
+  specs:
+    pa (1.2.3)
+
+PATH
   remote: /home/guten/dev/one/tagen
   specs:
     tagen (1.1.7)
@@ -18,7 +23,6 @@ GEM
     multi_json (1.1.0)
     optimism (3.1.2)
       hike (~> 1.2.0)
-    pa (1.2.3)
     pd (1.0.5)
       awesome_print
     rag (1.2.1)
@@ -43,7 +47,7 @@ PLATFORMS
 
 DEPENDENCIES
   optimism
-  pa
+  pa!
   pd
   rag
   rmagick (~> 2.13.0)

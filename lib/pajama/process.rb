@@ -20,14 +20,13 @@ module Pajama
       def run(type)
         files = Pa.each_r(Rc.p.new).with_object([]) {|(p), m|
           next if p.directory? 
-          next if p.name =~ /^src\.|^tao\./
 
-          m << p
+          m << p if p.name =~ /^pro\./
         }
 
         Process.find(type).process(*files)
 
-        Pa.mv_f "#{Rc.p.new}/*", "#{Rc.p.release}"
+        Pa.mv_f "#{Rc.p.new}/*", "#{Rc.p.release}", :show_cmd => true
       end
     end
   end

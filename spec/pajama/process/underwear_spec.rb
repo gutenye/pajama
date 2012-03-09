@@ -28,7 +28,7 @@ describe Underwear do
 	xdescribe ".process_all" do
 		it "works" do
       files = Pa.ls("#{$spec_data}/gooten/new/jz13", :absolute => true)
-			Underwear.process_all(files)
+			Underwear.process_all(*files)
 
 			`feh --scale-down #{$spec_data}/gooten/new/jz13/tao.all.jpg`
 		end
@@ -37,7 +37,7 @@ describe Underwear do
   xdescribe ".process_1200x" do
     it "works" do
       files = [Pa("#{$spec_data}/gooten/new/jz13/pro.10.jpg")]
-      Underwear.process_1200x(files)
+      Underwear.process_1200x(*files)
 
       puts Pa.ls "#{$spec_data}/gooten/new/jz13"
 
@@ -48,7 +48,7 @@ describe Underwear do
   xdescribe ".process_30x30" do
     it "works" do
       files = [Pa("#{$spec_data}/gooten/new/jz13/pro.10.jpg")]
-      Underwear.process_30x30(files)
+      Underwear.process_30x30(*files)
 
       `feh --scale-down #{$spec_data}/gooten/new/jz13/tao.10_30x30.jpg`
     end

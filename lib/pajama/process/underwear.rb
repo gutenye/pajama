@@ -2,25 +2,30 @@ module Pajama
   class Process
     class Underwear < Base
       class << self
-        def process(files, o={})
-          Underwear.process_1200x files, o
-          Underwear.process_30x30 files, o
-          Underwear.process_all files, o
+        # (*files, o={})
+        def process(*files)
+          Underwear.process_1200x *files
+          Underwear.process_30x30 *files
+          Underwear.process_all *files
         end
 
         # only for 00.jpg 10.jpg detail1.jpg
-        def process_1200x(files, o={})
+        def process_1200x(*files)
+          files, o = files.extract_options
+
           files.find_all { |pa|
             %w[00 10 detail1].include? pa.name.sub(/^pro\./, '')
           }.each { |pa|
             ::Pajama.ui.say "process 1200x: #{pa}"
-            process = Underwear.new(pa)
+            process = Underwear.new(pa, o)
             process.process_1200x
           }
         end
 
         # all front 10.jpg 20.jpg ..
-        def process_30x30(files, o={})
+        def process_30x30(*files)
+          files, o = files.extract_options
+
           # 10.jpg -> 30x30
           files.find_all { |pa|
             pa.name =~ /^pro\.[1-9]0$/
@@ -31,7 +36,9 @@ module Pajama
           }
         end
 
-        def process_all(files, o={})
+        def process_all(*files)
+          files, o = files.extract_options
+
           #
           # all.jpg -> 750x
           #

@@ -4,7 +4,7 @@ module Pajama
 	class CLI < Thor
 
     class_option "no-color", :banner => "Disable colorization in output", :type => :boolean
-    class_option "verbose", :aliases => "-V", :banner => "Enable verbose output mode" :type => :boolean
+    class_option "verbose", :aliases => "-V", :banner => "Enable verbose output mode", :type => :boolean
 		class_option "profile", :aliases => "-p", :default => "default", :banner => "load user profile", :type => :string
 
     attr_reader :o
@@ -17,12 +17,12 @@ module Pajama
       Pajama.ui.debug! if options["verbose"]
 
       # load profile configuration
-      Rc._merge! Optimima.require("~/.pajama/#{o[:profile]}")
+      Rc._merge! Optimism.require("~/.pajama/#{o[:profile]}")
 			Rc.profile = o[:profile]
     end
 
-		desc "process <type>", "process pic"
-		def process(type)
+		desc "taobao <type>", "taobao underwear"
+		def taobao(type)
       Process.run type
 		end
 

@@ -5,12 +5,12 @@ p:
 	project = Pa("~/gooten")
   home = Pa("~/.pajama")
 
-  new = Pa("#{project}/new")
-	release = Pa("#{project}/release")
+  new = Pa("~/gooten/new")
+	release = Pa("~/gooten/release")
   archive = project
 
 	mount_point  = Pa("/media/camera")
-	watermark = Pa("#{project}/watermark.png")
+	watermark = Pa("~/gooten/watermark.png")
 
 o:
   watermark = [0.5, 0, 0]

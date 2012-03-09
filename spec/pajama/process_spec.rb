@@ -24,12 +24,7 @@ describe Process do
 
     it "works" do
       Process.stub_chain("find.process")
-
-      Process.stub(:find){
-        x = double
-        x.should_receive(:process).with(Pa("#{$spec_data}/gooten/new/a.jpg"))
-        x
-      }
+      Process.stub(:find){ x=double; x.should_receive(:process).with(Pa("#{$spec_data}/gooten/new/a.jpg")); x }
 
       Process.run("pajama")
 

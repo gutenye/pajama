@@ -7,7 +7,7 @@ module Pajama
     end
 
 		def handle(dir_desc="new")
-			path = Pa"#{Rc.p.pic}/#{dir_desc}"
+			path = Pa"#{Rc.p.project}/#{dir_desc}"
 
 			o={}
 			# "new"
@@ -40,7 +40,7 @@ module Pajama
 
 			# empty new/
 			if o[:new]
-				Pa.rm_r "#{Rc.p.pic}/new/*" unless $spec_test
+				Pa.rm_r "#{Rc.p.project}/new/*" unless $spec_test
 			end
 
 		end
@@ -54,7 +54,7 @@ module Pajama
 
 			# move to pajama/jyx1114
 			if o[:new]
-				Pa.mv_f dir, "#{Rc.p.pic}/#{type}"
+				Pa.mv_f dir, "#{Rc.p.project}/#{type}"
 			end
 		end
 	end

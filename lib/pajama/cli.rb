@@ -38,7 +38,7 @@ module Pajama
 				exit
 			end
 
-      Pa.mv "#{Rc.p.mount_point}/*.JPG", "#{Rc.p.pic}/new"
+      Pa.mv "#{Rc.p.mount_point}/*.JPG", "#{Rc.p.project}/new"
 		end
 
 		desc "clean", "clean up release directory"
@@ -48,7 +48,7 @@ module Pajama
 
 		desc "origin", "cp new to original"
 		def origin
-			Pa.cp_f "#{Rc.p.pic}/new/*",  "#{Rc.p.pic}/original"
+			Pa.cp_f "#{Rc.p.project}/new/*",  "#{Rc.p.project}/original"
 		end
 	end
 end

@@ -16,7 +16,10 @@ p:
   archive = project
 
 	mount_point  = Pa("#{$spec_data}/camera")
-	watermark = Pa("#{$spec_data}/watermark.png")
+	watermark = Pa("#{$spec_data}/watermarks/gooten.png")
+
+o:
+  watermark = [0.8, "Center", 0, 0]
 EOF
 
 RSpec.configure do |config|
